@@ -20,7 +20,6 @@ namespace spatial_analysis_cholera
 		    DataTable addressesDt = ConvertCsvToDataTable(pathAddresses, 6, ",");
 			pumpsDt.TableName = "addressesDt";
 
-
 			// creating a list of points from the coordinates
 			List<Point> pumpsPointsList = new List<Point>();
 			for (int i = 0; i < pumpsDt.Rows.Count; i++)
@@ -40,8 +39,9 @@ namespace spatial_analysis_cholera
 				}
 			}
 
+			//analysis
 
-			// Now we'll check which pump is the nearest to the addresses of the main cholera cases
+			// now we'll check which pump is the nearest to the addresses of the main cholera cases
 			pumpsDt.Columns.Add("avgDistToCholeraCases", typeof(double));			
 			for (int i = 0; i < pumpsDt.Rows.Count; i++)
 			{
@@ -56,6 +56,33 @@ namespace spatial_analysis_cholera
 			DataView dv = pumpsDt.DefaultView;
 			dv.Sort = "avgDistToCholeraCases ASC";
 			DataTable sortedPumpsDt = dv.ToTable();
+
+			/* 
+			  let's check the distance between the pump and the cholera cases from the cases point of view.
+			   we'll caclulate the mean centre  and weighted mean centre of the cases, and then check if these centres
+			   are similar to the pump's average distance from the cases. The simple mean centre should be the same, 
+			   but the weighted can be different. The weight is the percentage of the cholera cases in the building.
+			   Soon to be added - Manhatten Median
+			*/
+			Point meanCenterPnt = Point.meanCentre(choleraAddressesPointsList);
+			Point weightedMeanCenterPnt = Point.weightedMeanCentre(choleraAddressesPointsList, addressesDt);
+			for (int i = 0; i < pumpsDt.Rows.Count; i++)
+			{
+				double x = double.Parse(pumpsDt.Rows[i]["xPump"].ToString()); //pumpsDt.Rows[i]["avgDistToCholeraCases"].ToString());
+				double y = double.Parse(pumpsDt.Rows[i]["yPump"].ToString());
+				Point pntPump = new Point(x, y);
+				double distToMeanCenter = Point.returnPointsDistance(pntPump, meanCenterPnt);
+				double distToWeightMeanCenter = Point.returnPointsDistance(pntPump, weightedMeanCenterPnt);
+
+				string pumpRow = String.Format("Pump number {0} distance to the cholera cases mean center is {1} meter.",
+					pumpsDt.Rows[i]["pumpId"].ToString(), String.Format("{0:0}", distToMeanCenter));
+				string pumpRow2 = String.Format("Pump number {0} distance to the cholera cases weighted mean center is {1} meter.",
+					pumpsDt.Rows[i]["pumpId"].ToString(), String.Format("{0:0}", distToWeightMeanCenter));
+
+				Console.WriteLine(pumpRow);
+				Console.WriteLine(pumpRow2);
+			}
+
 
 
 			// using an implementation I did for the 'Nearest Neighbour Index' to see if the cholera cases are clustered or dispersed

@@ -1,8 +1,9 @@
-﻿using Microsoft.Office.Interop.Excel;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using System.Data;
+
 
 namespace spatial_analysis_cholera
 {
@@ -97,6 +98,52 @@ namespace spatial_analysis_cholera
                 return average_distance;
             }
             return average_distance;
+        }
+
+        public static Point meanCentre(List<Point> pntList)
+        {
+            double xMean = 0;
+            double yMean = 0;
+            double sumX = 0;
+            double sumY = 0;
+
+            for (int i = 0; i < pntList.Count; i++)
+            {
+                sumX += pntList[i].x;
+                sumY += pntList[i].y;
+            }
+
+            xMean = sumX / pntList.Count;
+            yMean = sumY / pntList.Count;
+
+            Point pnt = new Point(xMean, yMean);
+            return pnt;
+        }
+
+        public static Point weightedMeanCentre(List<Point> pntList, DataTable weightsDt)
+        {
+            double xMean = 0;
+            double yMean = 0;
+            double sumX = 0;
+            double sumY = 0;
+            double sumWeight = 0;
+
+            for (int i = 0; i < pntList.Count; i++)
+            {
+                double residents = double.Parse(weightsDt.Rows[i]["buildingPop"].ToString());
+                double numOfCholeraCases = double.Parse(weightsDt.Rows[i]["choleraCases"].ToString());
+                double currentWeight = (numOfCholeraCases / residents) * 100;
+
+                sumX += currentWeight * pntList[i].x;
+                sumY += currentWeight * pntList[i].y;
+                sumWeight += currentWeight;
+            }
+
+            xMean = sumX / sumWeight;
+            yMean = sumY / sumWeight;
+
+            Point pnt = new Point(xMean, yMean);
+            return pnt;
         }
 
 
