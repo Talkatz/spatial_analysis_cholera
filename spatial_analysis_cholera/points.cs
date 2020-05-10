@@ -130,9 +130,7 @@ namespace spatial_analysis_cholera
 
             for (int i = 0; i < pntList.Count; i++)
             {
-                double residents = double.Parse(weightsDt.Rows[i]["buildingPop"].ToString());
-                double numOfCholeraCases = double.Parse(weightsDt.Rows[i]["choleraCases"].ToString());
-                double currentWeight = (numOfCholeraCases / residents) * 100;
+                double currentWeight = double.Parse(weightsDt.Rows[i]["infectedPerc"].ToString()) * 100;
 
                 sumX += currentWeight * pntList[i].x;
                 sumY += currentWeight * pntList[i].y;

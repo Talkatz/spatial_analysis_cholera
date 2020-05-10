@@ -28,10 +28,12 @@ namespace spatial_analysis_cholera
 				pumpsPointsList.Add(pnt);
 			}
 			List<Point> choleraAddressesPointsList = new List<Point>();
+			addressesDt.Columns.Add("infectedPerc", typeof(double)); // adding a column of the percentage of the cholera cases in the building
 			for (int i = 0; i < addressesDt.Rows.Count; i++)
 			{
 				double residents = double.Parse(addressesDt.Rows[i]["buildingPop"].ToString());
 				double numOfCholeraCases = double.Parse(addressesDt.Rows[i]["choleraCases"].ToString());
+				addressesDt.Rows[i]["infectedPerc"] = numOfCholeraCases / residents;
 				if ((numOfCholeraCases / residents) >= 0.05) //if at least 5% of the residents in the building were diagnosed with cholera
 				{
 					Point pnt = new Point(double.Parse(addressesDt.Rows[i]["x"].ToString()), double.Parse(addressesDt.Rows[i]["y"].ToString()));
@@ -39,13 +41,13 @@ namespace spatial_analysis_cholera
 				}
 			}
 
-			//analysis
+			// Analysis
 
 			// now we'll check which pump is the nearest to the addresses of the main cholera cases
 			pumpsDt.Columns.Add("avgDistToCholeraCases", typeof(double));			
 			for (int i = 0; i < pumpsDt.Rows.Count; i++)
 			{
-				double x = double.Parse(pumpsDt.Rows[i]["xPump"].ToString()); //pumpsDt.Rows[i]["avgDistToCholeraCases"].ToString());
+				double x = double.Parse(pumpsDt.Rows[i]["xPump"].ToString());
 				double y = double.Parse(pumpsDt.Rows[i]["yPump"].ToString());
 				pumpsDt.Rows[i]["avgDistToCholeraCases"] = Point.distanceFromPump(x, y, choleraAddressesPointsList);
 				string pumpRow = String.Format("Pump number {0} average distance to the cholera cases is {1} meter.",
@@ -90,21 +92,49 @@ namespace spatial_analysis_cholera
 			double nearestNeighborIndex = Point.nearestNeighbourIndex(choleraAddressesPointsList, rectangleAreaOfCholeraCases);
 			if (nearestNeighborIndex < 1)
 			{
-				Console.WriteLine("The points pattern is clustered");
+				Console.WriteLine("The points pattern is clustered.");
 			}
 			else if (nearestNeighborIndex >= 1)
 			{
-				Console.WriteLine("The points pattern is randomly dispersed");
+				Console.WriteLine("The points pattern is randomly dispersed.");
 			}
 			else if ((nearestNeighborIndex > 1) && (nearestNeighborIndex < 2.15))
 			{
-				Console.WriteLine("The points pattern is regularly dispersed");
+				Console.WriteLine("The points pattern is regularly dispersed.");
 			}
 			else if (nearestNeighborIndex >= 2.15)
 			{
-				Console.WriteLine("The points pattern is regularly uniform dispersed");
+				Console.WriteLine("The points pattern is regularly uniform dispersed.");
 			}
-		}
+
+
+			// now we will check if being near each pump is with correlation (linear regression) of being infected with cholera
+			for (int i = 0; i < pumpsDt.Rows.Count; i++)
+			{
+				// making the two lists that will be checked with linear regression
+				List<double> distances = new List<double>();
+				List<double> infectedPer = new List<double>();
+				Point pntPump = new Point(double.Parse(pumpsDt.Rows[i]["xPump"].ToString()), double.Parse(pumpsDt.Rows[i]["yPump"].ToString()));
+				for (int j = 0; j < addressesDt.Rows.Count; j++)
+				{
+					Point pntAddr = new Point(double.Parse(addressesDt.Rows[j]["x"].ToString()), double.Parse(addressesDt.Rows[j]["y"].ToString()));
+					distances.Add(Point.returnPointsDistance(pntAddr, pntPump));
+					infectedPer.Add(double.Parse(addressesDt.Rows[j]["infectedPerc"].ToString()));
+				}
+
+				double correl = 0;
+				double cov = 0;
+				linearReg(distances, infectedPer, out correl, out cov);
+
+				if (correl != (-999))
+				{
+					string pumpRow = String.Format("The correlation between the infected percentage in the buildings (The dependent) and their distances (The explanatory) " +
+						"to pump number {0} is {1}.",
+						pumpsDt.Rows[i]["pumpId"].ToString(), String.Format("{0:0.00}", correl));
+					Console.WriteLine(pumpRow);
+				}
+			}
+		} 
 
 		// a method to import an csv into a dataTable
 		public static DataTable ConvertCsvToDataTable(string csvFilePath, int numOfColumns, string delimiter)
@@ -141,5 +171,51 @@ namespace spatial_analysis_cholera
 			}
 			return dt;
         }
-    }
+
+		// linear regression method
+		public static void linearReg (List<double> list1, List<double> list2, out double correlation, out double covariance)
+		{
+			correlation = -999;
+			covariance = -999;
+
+			if (list1.Count != list2.Count)
+			{
+				Console.WriteLine("The lists must be of the same length");
+				return;
+			}
+
+			double sumXy = 0;
+			double sumX = 0;
+			double sumXsqr = 0;
+			double sumY = 0;
+			double sumYsqr = 0;
+
+			for (int i = 0; i < list1.Count; ++i)
+			{
+				Double x = list1[i];
+				Double y = list2[i];
+
+				sumX += x;
+				sumXsqr += Math.Pow(x, 2.00);
+				sumY += y;
+				sumYsqr += Math.Pow(y, 2.00);
+
+				sumXy += x * y;
+			}
+
+			try
+			{
+				correlation = (list1.Count * sumXy - sumX * sumY) / (Math.Sqrt((list1.Count * sumXsqr - Math.Pow(sumX, 2.00))
+				   * (list1.Count * sumYsqr - Math.Pow(sumY, 2.00))));
+				covariance = (sumXy / list1.Count - sumX * sumY / list1.Count / list1.Count);
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex.ToString());
+			}
+
+
+			return;
+		}
+	}
 }
