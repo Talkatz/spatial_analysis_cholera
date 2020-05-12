@@ -69,36 +69,36 @@ namespace spatial_analysis_cholera
         }
 
         // a method that returns the average distance from a point to a list of points
-        public static double distanceFromPump(double input_xCord, double input_yCord, List<Point> addressesPntList)
-        {
-            List<double> distList = new List<double>();
-            double average_distance = (-1);
-            Point pnt = new Point(input_xCord, input_yCord);
-            try
+            public static double distanceFromPump(double input_xCord, double input_yCord, List<Point> addressesPntList)
             {
-                for (int i = 0; i < addressesPntList.Count; i++)
+                List<double> distList = new List<double>();
+                double average_distance = (-1);
+                Point pnt = new Point(input_xCord, input_yCord);
+                try
                 {
-                    double distToPump = 0;
-                    try
+                    for (int i = 0; i < addressesPntList.Count; i++)
                     {
-                        distToPump = Point.returnPointsDistance(addressesPntList[i], pnt);
-                        distList.Add(distToPump);
+                        double distToPump = 0;
+                        try
+                        {
+                            distToPump = Point.returnPointsDistance(addressesPntList[i], pnt);
+                            distList.Add(distToPump);
+                        }
+                        catch
+                        {
+                            // do something with the error
+                            continue;
+                        }
                     }
-                    catch
-                    {
-                        // do something with the error
-                        continue;
-                    }
+                    average_distance = distList.Average();
                 }
-                average_distance = distList.Average();
-            }
-            catch
-            {
-                // do something with the error
+                catch
+                {
+                    // do something with the error
+                    return average_distance;
+                }
                 return average_distance;
             }
-            return average_distance;
-        }
 
         public static Point meanCentre(List<Point> pntList)
         {
