@@ -84,7 +84,7 @@ namespace spatial_analysis_cholera
                         distToPump = Point.returnPointsDistance(addressesPntList[i], pnt);
                         distList.Add(distToPump);
                     }
-                    catch (Exception ex)
+                    catch
                     {
                         // do something with the error
                         continue;
@@ -92,7 +92,7 @@ namespace spatial_analysis_cholera
                 }
                 average_distance = distList.Average();
             }
-            catch (Exception ex)
+            catch
             {
                 // do something with the error
                 return average_distance;
