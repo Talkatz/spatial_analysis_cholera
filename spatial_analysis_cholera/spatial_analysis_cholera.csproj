@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <COMReference Include="Microsoft.Office.Excel.dll">
+    <COMReference Include="Microsoft.Office.Excel.dll" Condition="'$(MSBuildRuntimeType)' != 'Core'">
       <Guid>00020813-0000-0000-c000-000000000046</Guid>
       <VersionMajor>1</VersionMajor>
       <VersionMinor>9</VersionMinor>
@@ -14,7 +14,7 @@
       <Lcid>0</Lcid>
       <Isolated>false</Isolated>
     </COMReference>
-    <COMReference Include="Microsoft.Office.Core.dll">
+    <COMReference Include="Microsoft.Office.Core.dll" Condition="'$(MSBuildRuntimeType)' != 'Core'">
       <Guid>2df8d04c-5bfa-101b-bde5-00aa0044de52</Guid>
       <VersionMajor>2</VersionMajor>
       <VersionMinor>8</VersionMinor>

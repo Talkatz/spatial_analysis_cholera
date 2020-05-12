@@ -8,16 +8,16 @@ using Microsoft.VisualBasic.CompilerServices;
 
 namespace spatial_analysis_cholera
 {
-    class Program
-    {
-        static void Main(string[] args) 
-        {
+	class Program
+	{
+		static void Main(string[] args) 
+		{
 			// importing the data from excel into dataTables
-			string pathPumps = @"C:\talkatz_github\arcobjects distance\project_upload\pumpsCsv.csv";
-			string pathAddresses = @"C:\talkatz_github\arcobjects distance\project_upload\addressesCsv.csv";
-            DataTable pumpsDt = ConvertCsvToDataTable(pathPumps, 3, ",");
+			string pathPumps = Path.Combine(Directory.GetCurrentDirectory(), "pumpsCsv.csv"); ;
+			string pathAddresses = Path.Combine(Directory.GetCurrentDirectory(), "addressesCsv.csv"); ;
+			DataTable pumpsDt = ConvertCsvToDataTable(pathPumps, 3, ",");
 			pumpsDt.TableName = "pumpsDt";
-		    DataTable addressesDt = ConvertCsvToDataTable(pathAddresses, 6, ",");
+			DataTable addressesDt = ConvertCsvToDataTable(pathAddresses, 6, ",");
 			pumpsDt.TableName = "addressesDt";
 
 			// creating a list of points from the coordinates
@@ -27,6 +27,7 @@ namespace spatial_analysis_cholera
 				Point pnt = new Point(double.Parse(pumpsDt.Rows[i]["xPump"].ToString()), double.Parse(pumpsDt.Rows[i]["yPump"].ToString()));
 				pumpsPointsList.Add(pnt);
 			}
+
 			List<Point> choleraAddressesPointsList = new List<Point>();
 			addressesDt.Columns.Add("infectedPerc", typeof(double)); // adding a column of the percentage of the cholera cases in the building
 			for (int i = 0; i < addressesDt.Rows.Count; i++)
@@ -44,7 +45,7 @@ namespace spatial_analysis_cholera
 			// Analysis
 
 			// now we'll check which pump is the nearest to the addresses of the main cholera cases
-			pumpsDt.Columns.Add("avgDistToCholeraCases", typeof(double));			
+			pumpsDt.Columns.Add("avgDistToCholeraCases", typeof(double));
 			for (int i = 0; i < pumpsDt.Rows.Count; i++)
 			{
 				double x = double.Parse(pumpsDt.Rows[i]["xPump"].ToString());
@@ -61,7 +62,7 @@ namespace spatial_analysis_cholera
 
 			/* 
 			  let's check the distance between the pump and the cholera cases from the cases point of view.
-			   we'll caclulate the mean centre  and weighted mean centre of the cases, and then check if these centres
+			   we'll calculate the mean centre  and weighted mean centre of the cases, and then check if these centres
 			   are similar to the pump's average distance from the cases. The simple mean centre should be the same, 
 			   but the weighted can be different. The weight is the percentage of the cholera cases in the building.
 			   Soon to be added - Manhatten Median
@@ -84,8 +85,6 @@ namespace spatial_analysis_cholera
 				Console.WriteLine(pumpRow);
 				Console.WriteLine(pumpRow2);
 			}
-
-
 
 			// using an implementation I did for the 'Nearest Neighbour Index' to see if the cholera cases are clustered or dispersed
 			double rectangleAreaOfCholeraCases = Point.rectangleArea(choleraAddressesPointsList);
@@ -138,7 +137,7 @@ namespace spatial_analysis_cholera
 
 		// a method to import an csv into a dataTable
 		public static DataTable ConvertCsvToDataTable(string csvFilePath, int numOfColumns, string delimiter)
-        {
+		{
 			DataTable dt = new DataTable();
 
 			using (var reader = new StreamReader(csvFilePath))
@@ -170,7 +169,7 @@ namespace spatial_analysis_cholera
 				}
 			}
 			return dt;
-        }
+		}
 
 		// linear regression method
 		public static void linearReg (List<double> list1, List<double> list2, out double correlation, out double covariance)
