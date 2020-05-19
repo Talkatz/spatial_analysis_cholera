@@ -50,7 +50,7 @@ namespace spatial_analysis_cholera
 			{
 				double x = double.Parse(pumpsDt.Rows[i]["xPump"].ToString());
 				double y = double.Parse(pumpsDt.Rows[i]["yPump"].ToString());
-				pumpsDt.Rows[i]["avgDistToCholeraCases"] = Point.distanceFromPump(x, y, choleraAddressesPointsList);
+				pumpsDt.Rows[i]["avgDistToCholeraCases"] = Point.avgDistanceFromPump(x, y, choleraAddressesPointsList);
 				string pumpRow = String.Format("Pump number {0} average distance to the cholera cases is {1} meter.",
 					pumpsDt.Rows[i]["pumpId"].ToString(), String.Format("{0:0}", pumpsDt.Rows[i]["avgDistToCholeraCases"]));
 				Console.WriteLine(pumpRow);
@@ -65,13 +65,12 @@ namespace spatial_analysis_cholera
 			   we'll calculate the mean centre  and weighted mean centre of the cases, and then check if these centres
 			   are similar to the pump's average distance from the cases. The simple mean centre should be the same, 
 			   but the weighted can be different. The weight is the percentage of the cholera cases in the building.
-			   Soon to be added - Manhatten Median
 			*/
 			Point meanCenterPnt = Point.meanCentre(choleraAddressesPointsList);
 			Point weightedMeanCenterPnt = Point.weightedMeanCentre(choleraAddressesPointsList, addressesDt);
 			for (int i = 0; i < pumpsDt.Rows.Count; i++)
 			{
-				double x = double.Parse(pumpsDt.Rows[i]["xPump"].ToString()); //pumpsDt.Rows[i]["avgDistToCholeraCases"].ToString());
+				double x = double.Parse(pumpsDt.Rows[i]["xPump"].ToString());
 				double y = double.Parse(pumpsDt.Rows[i]["yPump"].ToString());
 				Point pntPump = new Point(x, y);
 				double distToMeanCenter = Point.returnPointsDistance(pntPump, meanCenterPnt);
@@ -212,8 +211,6 @@ namespace spatial_analysis_cholera
 			{
 				Console.WriteLine(ex.ToString());
 			}
-
-
 			return;
 		}
 	}

@@ -69,7 +69,7 @@ namespace spatial_analysis_cholera
         }
 
         // a method that returns the average distance from a point to a list of points
-            public static double distanceFromPump(double input_xCord, double input_yCord, List<Point> addressesPntList)
+            public static double avgDistanceFromPump(double input_xCord, double input_yCord, List<Point> addressesPntList)
             {
                 List<double> distList = new List<double>();
                 double average_distance = (-1);
@@ -102,21 +102,9 @@ namespace spatial_analysis_cholera
 
         public static Point meanCentre(List<Point> pntList)
         {
-            double xMean = 0;
-            double yMean = 0;
-            double sumX = 0;
-            double sumY = 0;
-
-            for (int i = 0; i < pntList.Count; i++)
-            {
-                sumX += pntList[i].x;
-                sumY += pntList[i].y;
-            }
-
-            xMean = sumX / pntList.Count;
-            yMean = sumY / pntList.Count;
-
-            Point pnt = new Point(xMean, yMean);
+            double mean_x = pntList.Average(point => point.x);
+            double mean_y = pntList.Average(point => point.y);
+            Point pnt = new Point(mean_x, mean_y);
             return pnt;
         }
 
@@ -143,7 +131,6 @@ namespace spatial_analysis_cholera
             Point pnt = new Point(xMean, yMean);
             return pnt;
         }
-
 
     }
 }
